@@ -26,7 +26,7 @@ export const getSalesLeads = async (req: AuthRequest, res: Response) => {
 
 export const getSanctionLoans = async (req: AuthRequest, res: Response) => {
   try {
-    const loans = await loanRepository.find({ status: LoanStatus.PENDING });
+    const loans = await loanRepository.findWithBorrower({ status: LoanStatus.PENDING });
     res.status(200).json({ loans });
   } catch (error: any) {
     logger.error(`Get Sanction Loans Error: ${error.message}`);
@@ -62,7 +62,7 @@ export const reviewLoan = async (req: AuthRequest, res: Response) => {
 
 export const getDisbursementLoans = async (req: AuthRequest, res: Response) => {
   try {
-    const loans = await loanRepository.find({ status: LoanStatus.APPROVED });
+    const loans = await loanRepository.findWithBorrower({ status: LoanStatus.APPROVED });
     res.status(200).json({ loans });
   } catch (error: any) {
     logger.error(`Get Disbursement Loans Error: ${error.message}`);
@@ -88,8 +88,18 @@ export const disburseLoan = async (req: AuthRequest, res: Response) => {
 
 export const getCollectionLoans = async (req: AuthRequest, res: Response) => {
   try {
-    const loans = await loanRepository.find({ status: { $in: [LoanStatus.DISBURSED, LoanStatus.CLOSED] } });
-    res.status(200).json({ loans });
+    const loans = await loanRepository.findWithBorrower({ status: { $in: [LoanStatus.DISBURSED, LoanStatus.CLOSED] } });
+
+    // Attach amountPaid for each loan
+    const loansWithPayments = await Promise.all(
+      loans.map(async (loan) => {
+        const payments = await paymentRepository.find({ loanId: loan._id });
+        const amountPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+        return { ...loan, amountPaid, payments };
+      })
+    );
+
+    res.status(200).json({ loans: loansWithPayments });
   } catch (error: any) {
     logger.error(`Get Collection Loans Error: ${error.message}`);
     res.status(500).json({ error: 'Internal server error' });

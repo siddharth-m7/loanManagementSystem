@@ -34,7 +34,7 @@ export const applyLoan = async (req: AuthRequest, res: Response) => {
 
     // Update user profile if new information is provided
     if (pan || dob || salary || employmentMode) {
-      if (pan) user.pan = pan;
+      if (pan && pan !== user.pan) user.pan = pan; // Only update if PAN is new to avoid duplicate key errors
       if (dob) user.dob = new Date(dob);
       if (salary) user.salary = Number(salary);
       if (employmentMode) user.employmentMode = employmentMode;
@@ -79,6 +79,12 @@ export const applyLoan = async (req: AuthRequest, res: Response) => {
     });
   } catch (error: any) {
     logger.error(`Apply Loan Error: ${error.message || error}`);
+    // Handle MongoDB duplicate key error (e.g. PAN already registered to another user)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'field';
+      const fieldLabel = field === 'pan' ? 'PAN number' : field;
+      return res.status(400).json({ error: `This ${fieldLabel} is already registered to another account. Please use a different ${fieldLabel}.` });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -96,3 +102,21 @@ export const getMyLoans = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const getLoanById = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Loan ID is required' });
+    const loan = await loanRepository.findById(id as string);
+    if (!loan) return res.status(404).json({ error: 'Loan not found' });
+
+    // Populate borrower info
+    const borrower = await userRepository.findById(loan.borrowerId.toString());
+
+    res.status(200).json({ loan, borrower: borrower ? { name: borrower.name, email: borrower.email, pan: borrower.pan, salary: borrower.salary, employmentMode: borrower.employmentMode, dob: borrower.dob } : null });
+  } catch (error: any) {
+    logger.error(`Get Loan By ID Error: ${error.message || error}`);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+

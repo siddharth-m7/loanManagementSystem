@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --experimental-specifier-resolution=node --loader ts-node/esm src/server.ts",
-    "seed": "node --experimental-specifier-resolution=node --loader ts-node/esm scripts/seed.ts",
+    "dev": "nodemon --exec tsx src/server.ts",
+    "seed": "tsx scripts/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -34,6 +34,7 @@
     "@types/node": "^26.5.1",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   }
 }

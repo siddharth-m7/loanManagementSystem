@@ -9,4 +9,8 @@ export class LoanRepository extends BaseRepository<ILoan> {
   async findLoansByBorrower(borrowerId: string): Promise<ILoan[]> {
     return await this.find({ borrowerId });
   }
+
+  async findWithBorrower(filter: any): Promise<any[]> {
+    return await this.model.find(filter).populate('borrowerId', 'name email').lean().exec();
+  }
 }
