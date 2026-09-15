@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
+import loanRoutes from './routes/loanRoutes.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { logger } from './utils/logger.js';
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/loans', loanRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
