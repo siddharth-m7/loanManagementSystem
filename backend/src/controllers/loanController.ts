@@ -34,10 +34,10 @@ export const applyLoan = async (req: AuthRequest, res: Response) => {
 
     // Update user profile if new information is provided
     if (pan || dob || salary || employmentMode) {
-      user.pan = pan || user.pan;
-      user.dob = dob ? new Date(dob) : user.dob;
-      user.salary = salary ? Number(salary) : user.salary;
-      user.employmentMode = employmentMode || user.employmentMode;
+      if (pan) user.pan = pan;
+      if (dob) user.dob = new Date(dob);
+      if (salary) user.salary = Number(salary);
+      if (employmentMode) user.employmentMode = employmentMode;
       await user.save();
     }
 
