@@ -121,6 +121,14 @@ export const addPayment = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Payments can only be added to DISBURSED loans' });
     }
 
+    const allPayments = await paymentRepository.find({ loanId: loan._id });
+    const currentTotalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
+    const remaining = Math.round(Math.max(loan.totalRepayment - currentTotalPaid, 0));
+
+    if (Number(amount) > remaining) {
+      return res.status(400).json({ error: `Payment amount exceeds outstanding balance of ₹${remaining.toFixed(2)}` });
+    }
+
     // Add payment
     await paymentRepository.create({
       loanId: new mongoose.Types.ObjectId(id),
@@ -130,9 +138,8 @@ export const addPayment = async (req: AuthRequest, res: Response) => {
       recordedBy: new mongoose.Types.ObjectId(recordedBy)
     });
 
+    const totalPaid = currentTotalPaid + Number(amount);
     // Check if total payments cover the loan
-    const allPayments = await paymentRepository.find({ loanId: loan._id });
-    const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
 
     if (totalPaid >= loan.totalRepayment) {
       loan.status = LoanStatus.CLOSED;

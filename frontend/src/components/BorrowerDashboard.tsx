@@ -57,7 +57,7 @@ export default function BorrowerDashboard() {
       ) : (
         <div className="space-y-4">
           {loans.map((loan) => (
-            <div key={loan._id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-50 hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.1)] transition-all">
+            <div key={loan._id} onClick={() => setSelectedLoanId(loan._id)} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-50 hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.1)] transition-all cursor-pointer">
               
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-600">

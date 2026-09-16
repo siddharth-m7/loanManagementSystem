@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchApi } from '@/lib/api';
+import { fetchApi, SERVER_URL } from '@/lib/api';
 import LoanDetailModal from './LoanDetailModal';
 
 export default function SanctionDashboard() {
@@ -86,7 +86,7 @@ export default function SanctionDashboard() {
                     <span className="text-xs text-gray-400 font-mono mt-0.5">ID: {loan._id.slice(-6)}</span>
                   </div>
                   {loan.salarySlipUrl && (
-                    <a href={loan.salarySlipUrl} target="_blank" className="text-blue-600 text-xs font-bold hover:text-blue-700 hover:underline flex items-center gap-1 bg-blue-50 px-3 py-1 rounded-full">
+                    <a href={loan.salarySlipUrl.startsWith('http') ? loan.salarySlipUrl : `${SERVER_URL}${loan.salarySlipUrl}`} target="_blank" className="text-blue-600 text-xs font-bold hover:text-blue-700 hover:underline flex items-center gap-1 bg-blue-50 px-3 py-1 rounded-full">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
                       Slip
                     </a>

@@ -13,8 +13,8 @@ export default function ApplyLoanPage() {
   const [success, setSuccess] = useState(false);
 
   // Form Data
-  const [amount, setAmount] = useState('');
-  const [tenure, setTenure] = useState('');
+  const [amount, setAmount] = useState('50000');
+  const [tenure, setTenure] = useState('30');
   const [pan, setPan] = useState('');
   const [dob, setDob] = useState('');
   const [salary, setSalary] = useState('');
@@ -54,8 +54,8 @@ export default function ApplyLoanPage() {
     setError('');
     setBreReason('');
     
-    if (employmentMode === 'SALARIED' && !salarySlip) {
-      setError('Salary slip is required for salaried applicants');
+    if (!salarySlip) {
+      setError('Salary slip document is strictly required');
       return;
     }
 
@@ -134,35 +134,88 @@ export default function ApplyLoanPage() {
           <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
             {/* Step 1: Loan Requirements */}
             {step === 1 && (
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Loan Amount (₹)</label>
-                  <input
-                    type="number"
-                    min="50000"
-                    max="500000"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-gray-900 shadow-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="e.g. 100000"
-                  />
-                  <p className="mt-1.5 text-xs font-medium text-gray-400">Min: 50,000 | Max: 5,00,000</p>
+              <div className="space-y-8">
+                {/* Sliders */}
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-semibold text-gray-700">Loan Amount</label>
+                      <span className="text-xl font-black text-blue-600">₹{Number(amount).toLocaleString()}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="50000"
+                      max="500000"
+                      step="5000"
+                      className="w-full h-2.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                    />
+                    <div className="flex justify-between mt-2 text-xs font-bold text-gray-400">
+                      <span>₹50K</span>
+                      <span>₹5L</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-semibold text-gray-700">Tenure (Days)</label>
+                      <span className="text-xl font-black text-blue-600">{tenure} Days</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="30"
+                      max="365"
+                      step="1"
+                      className="w-full h-2.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      value={tenure}
+                      onChange={(e) => setTenure(e.target.value)}
+                    />
+                    <div className="flex justify-between mt-2 text-xs font-bold text-gray-400">
+                      <span>30 Days</span>
+                      <span>365 Days</span>
+                    </div>
+                  </div>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tenure (Days)</label>
-                  <input
-                    type="number"
-                    min="30"
-                    max="365"
-                    required
-                    className="block w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-gray-900 shadow-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
-                    value={tenure}
-                    onChange={(e) => setTenure(e.target.value)}
-                    placeholder="e.g. 90"
-                  />
-                  <p className="mt-1.5 text-xs font-medium text-gray-400">Min: 30 | Max: 365</p>
+
+                {/* Calculation Panel */}
+                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/50 p-6 shadow-sm">
+                  <h3 className="mb-4 text-sm font-bold text-blue-900 flex items-center gap-2">
+                    <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    Live Repayment Calculation
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 font-medium">Principal (P)</span>
+                      <span className="font-bold text-gray-900">₹{Number(amount).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 font-medium">Interest Rate (R)</span>
+                      <span className="font-bold text-gray-900">12% p.a.</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 font-medium">Tenure (T)</span>
+                      <span className="font-bold text-gray-900">{tenure} days</span>
+                    </div>
+                    
+                    <div className="my-4 border-t border-blue-200/60 pt-4">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-600 font-medium">Simple Interest (SI)</span>
+                        <span className="font-bold text-orange-600">
+                          + ₹{Math.round((Number(amount) * 12 * Number(tenure)) / (365 * 100)).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <span className="text-sm font-bold text-gray-700 uppercase tracking-wide">Total Repayment</span>
+                        <span className="text-2xl font-black text-green-700">
+                          ₹{Math.round(Number(amount) + (Number(amount) * 12 * Number(tenure)) / (365 * 100)).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -232,9 +285,7 @@ export default function ApplyLoanPage() {
                     className="block w-full text-sm text-gray-500 file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-blue-50 file:py-2 file:px-5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 transition-all"
                     onChange={(e) => setSalarySlip(e.target.files ? e.target.files[0] : null)}
                   />
-                  {employmentMode === 'SALARIED' && (
-                    <p className="mt-1.5 text-xs font-medium text-red-500">*Required for Salaried applicants</p>
-                  )}
+                  <p className="mt-1.5 text-xs font-medium text-red-500">*Strictly required for all applicants</p>
                 </div>
               </div>
             )}

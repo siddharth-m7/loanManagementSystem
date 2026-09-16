@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchApi } from '@/lib/api';
+import Navbar from '@/components/Navbar';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -44,8 +45,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50">
-      <div className="w-full max-w-md rounded-2xl bg-white/70 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl border border-white/50">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <Navbar />
+      <div className="relative flex flex-1 items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-3xl bg-white/70 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl border border-white/50">
         <h2 className="mb-8 text-center text-3xl font-extrabold tracking-tight text-gray-900">
           Create Account
         </h2>
@@ -107,6 +110,7 @@ export default function RegisterPage() {
             Login here
           </a>
         </div>
+      </div>
       </div>
     </div>
   );

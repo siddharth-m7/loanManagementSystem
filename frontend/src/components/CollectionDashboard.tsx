@@ -35,6 +35,7 @@ export default function CollectionDashboard() {
   const [loading, setLoading] = useState(true);
   const [openPanelId, setOpenPanelId] = useState<string | null>(null);
   const [viewLoanId, setViewLoanId] = useState<string | null>(null);
+  const [expandedHistory, setExpandedHistory] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
@@ -79,6 +80,17 @@ export default function CollectionDashboard() {
     }
     if (Number(payAmount) <= 0) {
       showToast('Amount must be greater than 0', 'error');
+      return;
+    }
+
+    const loan = loans.find(l => l._id === loanId);
+    if (!loan) return;
+
+    const amountPaid = loan.payments?.reduce((acc: number, p: any) => acc + p.amount, 0) || 0;
+    const remaining = Math.round(Math.max(loan.totalRepayment - amountPaid, 0));
+
+    if (Number(payAmount) > remaining) {
+      showToast(`Amount cannot exceed outstanding balance of ₹${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 'error');
       return;
     }
 
@@ -148,7 +160,7 @@ export default function CollectionDashboard() {
         <div className="space-y-4">
           {loans.map((loan) => {
             const amountPaid = loan.amountPaid ?? 0;
-            const remaining = Math.max(loan.totalRepayment - amountPaid, 0);
+            const remaining = Math.round(Math.max(loan.totalRepayment - amountPaid, 0));
             const isClosed = loan.status === 'CLOSED';
             const isOpen = openPanelId === loan._id;
 
@@ -235,8 +247,8 @@ export default function CollectionDashboard() {
                               value={payAmount}
                               onChange={(e) => setPayAmount(e.target.value)}
                               className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                              placeholder={`Max ₹${remaining.toLocaleString()}`}
-                              max={remaining}
+                              placeholder={`Max ₹${Math.round(Math.max(loan.totalRepayment - (loan.amountPaid ?? 0), 0)).toLocaleString()}`}
+                              max={Math.round(Math.max(loan.totalRepayment - (loan.amountPaid ?? 0), 0))}
                             />
                           </div>
                         </div>
@@ -280,15 +292,45 @@ export default function CollectionDashboard() {
                     </div>
                   )}
 
-                  {/* Payment history pills */}
+                  {/* Payment history list */}
                   {loan.payments && loan.payments.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {loan.payments.map((p: any, i: number) => (
-                        <span key={i} className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">
-                          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                          ₹{Number(p.amount).toLocaleString()} · {new Date(p.paymentDate).toLocaleDateString()}
-                        </span>
-                      ))}
+                    <div className="mt-6 rounded-2xl bg-gray-50/80 p-2 ring-1 ring-inset ring-gray-100/80">
+                      <button 
+                        className="flex w-full items-center justify-between rounded-xl px-4 py-3 hover:bg-white hover:shadow-sm transition-all"
+                        onClick={() => setExpandedHistory(prev => ({ ...prev, [loan._id]: !prev[loan._id] }))}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
+                            {loan.payments.length}
+                          </span>
+                          <h4 className="text-sm font-bold text-gray-800">Repayment History</h4>
+                        </div>
+                        <svg className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedHistory[loan._id] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {expandedHistory[loan._id] && (
+                        <div className="px-4 py-4 animate-in slide-in-from-top-2 fade-in duration-200">
+                          <div className="relative space-y-6 before:absolute before:inset-y-0 before:left-[7px] before:w-0.5 before:bg-gray-200">
+                            {loan.payments.map((p: any, i: number) => (
+                              <div key={i} className="relative pl-8 flex flex-wrap items-center justify-between gap-2">
+                                <span className="absolute left-[3px] top-1/2 flex h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-green-500 ring-4 ring-gray-50" />
+                                <div>
+                                  <p className="font-extrabold text-gray-900 text-base">₹{Number(p.amount).toLocaleString()}</p>
+                                  <p className="text-xs font-medium text-gray-500 mt-1">UTR: <span className="font-mono font-bold text-gray-600">{p.utrNumber}</span></p>
+                                </div>
+                                <div className="text-right">
+                                  <span className="block text-xs font-bold text-gray-600 mb-1.5">
+                                    {new Date(p.paymentDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  </span>
+                                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-green-700 ring-1 ring-inset ring-green-600/20">Success</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

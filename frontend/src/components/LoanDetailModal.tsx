@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchApi } from '@/lib/api';
+import { fetchApi, SERVER_URL } from '@/lib/api';
 
 interface Props {
   loanId: string;
@@ -103,7 +103,7 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
                     <Row
                       label="Salary Slip"
                       value={
-                        <a href={loan.salarySlipUrl} target="_blank" className="text-blue-600 underline hover:text-blue-700">
+                        <a href={loan.salarySlipUrl.startsWith('http') ? loan.salarySlipUrl : `${SERVER_URL}${loan.salarySlipUrl}`} target="_blank" className="text-blue-600 underline hover:text-blue-700">
                           View Document
                         </a>
                       }

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:7000/api';
+const API_URL = 'http://localhost:8000/api';
 
 async function request(endpoint, method = 'GET', body = null, token = null) {
   const headers = { 'Content-Type': 'application/json' };
@@ -43,14 +43,32 @@ async function runE2E() {
     // 2. Borrower applies for loan
     console.log('\n[2] Borrower applying for loan...');
     const randomPan = `ABCDE${Math.floor(Math.random() * 9000 + 1000)}F`;
-    const applyRes = await request('/loans/apply', 'POST', {
-      amount: 100000,
-      tenure: 90,
-      pan: randomPan,
-      dob: '1990-01-01',
-      salary: 80000,
-      employmentMode: 'SALARIED'
-    }, borrowerToken);
+    const formData = new FormData();
+    formData.append('amount', '100000');
+    formData.append('tenure', '90');
+    formData.append('pan', randomPan);
+    formData.append('dob', '1990-01-01');
+    formData.append('salary', '80000');
+    formData.append('employmentMode', 'SALARIED');
+    
+    // Create a dummy PDF blob
+    const dummyPdfContent = `%PDF-1.4\n1 0 obj <</Type /Catalog /Pages 2 0 R>> endobj\n2 0 obj <</Type /Pages /Kids [3 0 R] /Count 1>> endobj\n3 0 obj <</Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources <<>> /Contents 4 0 R>> endobj\n4 0 obj <</Length 0>> stream\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \n0000000009 00000 n \n0000000056 00000 n \n0000000111 00000 n \n0000000212 00000 n \ntrailer <</Size 5 /Root 1 0 R>>\nstartxref\n253\n%%EOF`;
+    const blob = new Blob([dummyPdfContent], { type: 'application/pdf' });
+    formData.append('salarySlip', blob, 'dummy_salary_slip.pdf');
+
+    const applyOptions = {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${borrowerToken}`
+      },
+      body: formData
+    };
+
+    const applyResRaw = await fetch(`${API_URL}/loans/apply`, applyOptions);
+    const applyRes = await applyResRaw.json();
+    if (!applyResRaw.ok) {
+      throw new Error(applyRes.error || applyRes.message || `API error: ${applyResRaw.status}`);
+    }
     console.log('Loan applied successfully.');
     const loanId = applyRes.loan._id;
     console.log(`Loan ID: ${loanId}`);

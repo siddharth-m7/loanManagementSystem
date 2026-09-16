@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Navbar from '@/components/Navbar';
 
 const roles = [
   {
@@ -71,15 +72,7 @@ const requirements = [
   { icon: '📋', label: 'Valid PAN Card', value: 'Mandatory for all applicants' },
   { icon: '💼', label: 'Minimum Salary', value: '₹25,000 per month' },
   { icon: '🏠', label: 'Employment Status', value: 'Salaried or self-employed' },
-  { icon: '📄', label: 'Age Requirement', value: '21 – 65 years' },
-  { icon: '📈', label: 'Credit Score', value: '650+ recommended' },
-];
-
-const stats = [
-  { value: '₹50L+', label: 'Loans Disbursed' },
-  { value: '500+', label: 'Happy Borrowers' },
-  { value: '99.9%', label: 'Uptime' },
-  { value: '24h', label: 'Avg. Approval Time' },
+  { icon: '📄', label: 'Age Requirement', value: '23 – 50 years' },
 ];
 
 const lifecycle = [
@@ -101,32 +94,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl font-extrabold tracking-tight">
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Credit</span>
-              <span className="text-gray-900">Sea</span>
-            </span>
-            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-600">v1.0</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => router.push('/login')}
-              className="rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => router.push('/register')}
-              className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition hover:scale-105 hover:shadow-blue-500/40"
-            >
-              Get Started
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-6 pb-24 pt-20 text-center">
@@ -140,7 +108,7 @@ export default function Home() {
           <h1 className="mb-6 text-5xl font-black leading-tight tracking-tight text-gray-900 sm:text-6xl">
             Smart Loans with{' '}
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              CreditSea
+              LMS
             </span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-gray-600">
@@ -164,24 +132,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="border-y border-gray-100 bg-white py-12">
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 px-6 sm:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="mb-1 text-4xl font-black text-gray-900">{s.value}</div>
-              <div className="text-sm font-medium text-gray-500">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Roles Section */}
       <section className="bg-gray-50 px-6 py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 text-center">
             <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900">
-              Who Uses CreditSea?
+              Who Uses LMS?
             </h2>
             <p className="mx-auto max-w-xl text-lg text-gray-500">
               Five distinct roles, each with a tailored dashboard and permissions — ensuring the right information reaches the right person.
@@ -245,53 +201,29 @@ export default function Home() {
       </section>
 
       {/* Loan Lifecycle */}
-      <section className="bg-gradient-to-br from-blue-600 to-indigo-700 px-6 py-24 text-white">
+      <section className="bg-gray-50 border-t border-gray-100 px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <div className="mb-14 text-center">
-            <h2 className="mb-4 text-4xl font-extrabold tracking-tight">Loan Lifecycle</h2>
-            <p className="mx-auto max-w-xl text-lg text-blue-100">
+            <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900">Loan Lifecycle</h2>
+            <p className="mx-auto max-w-xl text-lg text-gray-500">
               Every application follows a structured, transparent pipeline from start to finish.
             </p>
           </div>
-          <div className="flex flex-col items-center">
-            {lifecycle.map((item, i) => (
-              <div key={item.step} className="flex w-full max-w-xl flex-col items-center">
-                <div className="flex w-full items-start gap-4 rounded-2xl bg-white/10 p-5 backdrop-blur-sm ring-1 ring-white/20">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-black">
-                    {item.step}
-                  </span>
-                  <div>
-                    <div className="font-bold">{item.title}</div>
-                    <div className="text-sm text-blue-100">{item.desc}</div>
-                  </div>
-                </div>
-                {i < lifecycle.length - 1 && <div className="h-6 w-0.5 bg-white/20" />}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <div className="relative mx-auto mt-20 max-w-6xl">
+            {/* Connecting Line for Desktop */}
+            <div className="absolute left-1/2 top-10 hidden h-0.5 w-4/5 -translate-x-1/2 bg-gray-200 md:block" />
 
-      {/* CTA */}
-      <section className="bg-white px-6 py-24 text-center">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900">Ready to get started?</h2>
-          <p className="mb-10 text-lg text-gray-500">
-            Create a borrower account and apply for a loan in minutes, or log in as an executive to manage your workflow.
-          </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button
-              onClick={() => router.push('/register')}
-              className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-blue-500/30 transition hover:scale-[1.03] sm:w-auto"
-            >
-              Register as Borrower →
-            </button>
-            <button
-              onClick={() => router.push('/login')}
-              className="w-full rounded-xl border-2 border-gray-200 bg-white px-8 py-4 text-base font-bold text-gray-700 transition hover:border-blue-300 hover:bg-gray-50 sm:w-auto"
-            >
-              Staff Login
-            </button>
+            <div className="grid gap-12 md:grid-cols-5 md:gap-6">
+              {lifecycle.map((item, i) => (
+                <div key={item.step} className="relative z-10 flex flex-col items-center text-center group">
+                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm ring-4 ring-gray-100 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-600 group-hover:ring-blue-100">
+                    <span className="text-2xl font-black text-blue-600 group-hover:text-white transition-colors">{item.step}</span>
+                  </div>
+                  <h3 className="mb-3 text-lg font-extrabold tracking-tight text-gray-900">{item.title}</h3>
+                  <p className="text-sm font-medium text-gray-500 leading-relaxed px-2">{item.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -299,7 +231,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-gray-100 bg-gray-50 py-8 text-center text-sm text-gray-400">
         <p>
-          <span className="font-bold text-gray-700">CreditSea</span> — Loan Management System &nbsp;·&nbsp; Built with Next.js, Express &amp; MongoDB
+          <span className="font-bold text-gray-700">LMS</span> — Loan Management System &nbsp;&middot;&nbsp; Built with Next.js, Express &amp; MongoDB
         </p>
       </footer>
     </div>

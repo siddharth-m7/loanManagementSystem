@@ -91,7 +91,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700">
             <div className="h-4 w-4 rounded-full bg-blue-400"></div>
           </div>
-          <span className="text-xl font-bold tracking-tight text-gray-900">CreditSea LMS</span>
+          <span className="text-xl font-bold tracking-tight text-gray-900">LMS</span>
         </div>
         
 

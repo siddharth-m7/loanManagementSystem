@@ -53,9 +53,8 @@ export const applyLoan = async (req: AuthRequest, res: Response) => {
 
     // File Upload handling via multer
     const salarySlipUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
-    if (!salarySlipUrl && user.employmentMode === 'SALARIED') {
-       // Optional: enforce salary slip for salaried employees, but let's just log it or fail if required
-       // return res.status(400).json({ error: 'Salary slip is required for SALARIED employees' });
+    if (!salarySlipUrl) {
+       return res.status(400).json({ error: 'Salary slip document is strictly required' });
     }
 
     // Calculate Repayment (Simple Interest: P + (P * R * T / 365) / 100)
