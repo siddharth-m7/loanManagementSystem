@@ -55,8 +55,8 @@ export const applyLoan = async (req: AuthRequest, res: Response) => {
       await user.save();
     }
 
-    // File Upload handling via multer
-    const salarySlipUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+    // File Upload handling via multer (Cloudinary URL is in req.file.path)
+    const salarySlipUrl = req.file ? req.file.path : undefined;
     if (!salarySlipUrl) {
        return res.status(400).json({ error: 'Salary slip document is strictly required' });
     }
