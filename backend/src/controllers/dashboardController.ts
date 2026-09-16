@@ -14,9 +14,15 @@ const paymentRepository = new PaymentRepository();
 
 export const getSalesLeads = async (req: AuthRequest, res: Response) => {
   try {
-    // Basic approach: return all BORROWER users.
-    // For a real app, we might do an aggregation to find users with no loans.
-    const leads = await userRepository.find({ role: Role.BORROWER });
+    // Find all users who have applied for at least one loan
+    const existingLoans = await loanRepository.find({});
+    const borrowerIdsWithLoans = existingLoans.map(loan => loan.borrowerId);
+
+    // Find BORROWER users whose _id is NOT in the list of borrowerIdsWithLoans
+    const leads = await userRepository.find({ 
+      role: Role.BORROWER,
+      _id: { $nin: borrowerIdsWithLoans }
+    });
     res.status(200).json({ leads });
   } catch (error: any) {
     logger.error(`Get Sales Leads Error: ${error.message}`);
