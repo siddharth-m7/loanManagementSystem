@@ -1,34 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { fetchApi } from '@/lib/api';
 import LoanDetailModal from './LoanDetailModal';
-
-function PaymentProgress({ paid, total }: { paid: number; total: number }) {
-  const pct = Math.min((paid / total) * 100, 100);
-  return (
-    <div className="mt-4">
-      <div className="mb-1.5 flex items-center justify-between text-xs font-semibold">
-        <span className="text-gray-500">Collected</span>
-        <span className={pct >= 100 ? 'text-green-600' : 'text-indigo-600'}>
-          {pct.toFixed(1)}%
-        </span>
-      </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
-        <div
-          className={`h-2 rounded-full transition-all duration-700 ${pct >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-indigo-500 to-blue-500'}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <div className="mt-2 flex justify-between text-xs text-gray-500">
-        <span>Paid: <strong className="text-gray-900">₹{paid.toLocaleString()}</strong></span>
-        <span>Remaining: <strong className={pct >= 100 ? 'text-green-600' : 'text-red-600'}>
-          ₹{Math.max(total - paid, 0).toLocaleString()}
-        </strong></span>
-      </div>
-    </div>
-  );
-}
+import CollectionLoanCard from './CollectionLoanCard';
 
 export default function CollectionDashboard() {
   const [loans, setLoans] = useState<any[]>([]);
@@ -38,13 +14,13 @@ export default function CollectionDashboard() {
   const [expandedHistory, setExpandedHistory] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<'ACTIVE' | 'CLOSED'>('ACTIVE');
 
-  // Payment form state
-  const [payAmount, setPayAmount] = useState('');
-  const [utrNumber, setUtrNumber] = useState('');
-  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
-
-  useEffect(() => { fetchLoans(); }, []);
+  useEffect(() => {
+    setMounted(true);
+    fetchLoans();
+  }, []);
 
   const fetchLoans = async () => {
     try {
@@ -62,23 +38,16 @@ export default function CollectionDashboard() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const resetForm = () => {
-    setPayAmount('');
-    setUtrNumber('');
-    setPaymentDate(new Date().toISOString().split('T')[0]);
-  };
-
   const openPanel = (id: string) => {
     setOpenPanelId(openPanelId === id ? null : id);
-    resetForm();
   };
 
-  const handleAddPayment = async (loanId: string) => {
-    if (!payAmount || !utrNumber || !paymentDate) {
+  const handleAddPayment = async (loanId: string, amount: string, utr: string, date: string) => {
+    if (!amount || !utr || !date) {
       showToast('Please fill in all payment fields', 'error');
       return;
     }
-    if (Number(payAmount) <= 0) {
+    if (Number(amount) <= 0) {
       showToast('Amount must be greater than 0', 'error');
       return;
     }
@@ -87,28 +56,25 @@ export default function CollectionDashboard() {
     if (!loan) return;
 
     const amountPaid = loan.payments?.reduce((acc: number, p: any) => acc + p.amount, 0) || 0;
-    const remaining = Math.round(Math.max(loan.totalRepayment - amountPaid, 0));
+    const remaining = Math.ceil(Math.max(loan.totalRepayment - amountPaid, 0));
 
-    if (Number(payAmount) > remaining) {
+    if (Number(amount) > remaining) {
       showToast(`Amount cannot exceed outstanding balance of ₹${remaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 'error');
       return;
     }
 
-    setSubmitting(true);
     try {
-      const res = await fetchApi(`/dashboard/collection/loans/${loanId}/payment`, {
+      await fetchApi(`/dashboard/collection/loans/${loanId}/payment`, {
         method: 'POST',
-        body: JSON.stringify({ amount: Number(payAmount), utrNumber, paymentDate }),
+        body: JSON.stringify({ amount: Number(amount), utrNumber: utr, paymentDate: date }),
       });
 
-      showToast(res.message || 'Payment recorded!', 'success');
       setOpenPanelId(null);
-      resetForm();
       await fetchLoans(); // Refresh to get updated amountPaid
+      showToast('Payment recorded successfully', 'success');
     } catch (err: any) {
       showToast(err.message || 'Failed to record payment', 'error');
-    } finally {
-      setSubmitting(false);
+      throw err;
     }
   };
 
@@ -125,218 +91,96 @@ export default function CollectionDashboard() {
   const active = loans.filter((l) => l.status !== 'CLOSED');
   const closed = loans.filter((l) => l.status === 'CLOSED');
 
+  const renderLoan = (loan: any) => (
+    <CollectionLoanCard
+      key={loan._id}
+      loan={loan}
+      isOpen={openPanelId === loan._id}
+      onTogglePanel={() => openPanel(loan._id)}
+      onViewDetails={() => setViewLoanId(loan._id)}
+      onSubmitPayment={(amount, utr, date) => handleAddPayment(loan._id, amount, utr, date)}
+    />
+  );
+
   return (
-    <div className="rounded-2xl bg-white p-6 sm:p-8 shadow-sm border border-gray-100">
+    <div className="rounded bg-white p-6 sm:p-8 border-2 border-[#0f0f0f] shadow-[8px_8px_0_0_rgba(15,15,15,1)]">
       {/* Toast */}
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-lg animate-in slide-in-from-top-4 fade-in duration-300 ${
-          toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+      {mounted && toast && createPortal(
+        <div className={`fixed top-6 right-6 z-[100] flex items-center gap-3 rounded border-2 border-[#0f0f0f] px-5 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_rgba(15,15,15,1)] animate-in slide-in-from-top-4 fade-in duration-300 ${
+          toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
         }`}>
           {toast.type === 'success' ? '✓' : '✕'} {toast.msg}
-        </div>
+        </div>,
+        document.body
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Collection Dashboard</h2>
-        <div className="flex gap-2">
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
-            {active.length} Active
-          </span>
-          <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-700/10">
-            {closed.length} Closed
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-xl font-black text-[#0f0f0f] uppercase tracking-widest">Collection Dashboard</h2>
+        
+        {/* Tabs */}
+        <div className="flex bg-white p-1 rounded border-2 border-[#0f0f0f] shadow-[2px_2px_0_0_rgba(15,15,15,1)]">
+          <button
+            onClick={() => setActiveTab('ACTIVE')}
+            className={`flex items-center gap-2 px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest transition-all ${
+              activeTab === 'ACTIVE' 
+                ? 'bg-[#0f0f0f] text-white' 
+                : 'bg-white text-[#0f0f0f] hover:bg-gray-100'
+            }`}
+          >
+            Active
+            <span className={`flex h-4 items-center justify-center rounded px-1.5 text-[9px] ${
+              activeTab === 'ACTIVE' ? 'bg-white/20 text-white' : 'bg-[#0f0f0f]/10 text-[#0f0f0f]'
+            }`}>
+              {active.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('CLOSED')}
+            className={`flex items-center gap-2 px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest transition-all ${
+              activeTab === 'CLOSED' 
+                ? 'bg-[#0f0f0f] text-white' 
+                : 'bg-white text-[#0f0f0f] hover:bg-gray-100'
+            }`}
+          >
+            Closed
+            <span className={`flex h-4 items-center justify-center rounded px-1.5 text-[9px] ${
+              activeTab === 'CLOSED' ? 'bg-white/20 text-white' : 'bg-[#0f0f0f]/10 text-[#0f0f0f]'
+            }`}>
+              {closed.length}
+            </span>
+          </button>
         </div>
       </div>
 
       {loans.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl bg-gray-50 border border-dashed border-gray-300">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded bg-white border-2 border-[#0f0f0f]">
+          <svg className="mx-auto h-12 w-12 text-[#0f0f0f]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">No active loans</h3>
-          <p className="mt-1 text-sm text-gray-500">Disbursed loans will appear here for collection.</p>
+          <h3 className="mt-2 text-sm font-black uppercase tracking-widest text-[#0f0f0f]">No loans available</h3>
+          <p className="mt-1 text-xs font-bold text-gray-500">Disbursed loans will appear here for collection.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {loans.map((loan) => {
-            const amountPaid = loan.amountPaid ?? 0;
-            const remaining = Math.round(Math.max(loan.totalRepayment - amountPaid, 0));
-            const isClosed = loan.status === 'CLOSED';
-            const isOpen = openPanelId === loan._id;
-
-            return (
-              <div
-                key={loan._id}
-                className={`overflow-hidden rounded-[2rem] border transition-all duration-300 relative ${
-                  isClosed
-                    ? 'border-green-100 bg-green-50/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)]'
-                    : isOpen
-                    ? 'border-indigo-200 bg-white shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]'
-                    : 'border-gray-50 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-1'
-                }`}
-              >
-                {/* Status stripe */}
-                <div className={`absolute top-0 left-0 h-1.5 w-full ${isClosed ? 'bg-gradient-to-r from-green-400 to-green-500' : 'bg-gradient-to-r from-indigo-400 to-indigo-500'}`} />
-
-                <div className="p-5">
-                  {/* Top row */}
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-2xl font-black tracking-tight text-gray-900">
-                          ₹{loan.amount.toLocaleString()}
-                        </span>
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                          isClosed ? 'bg-green-100 text-green-700' : 'bg-indigo-100 text-indigo-700'
-                        }`}>
-                          {loan.status}
-                        </span>
-                      </div>
-                      <div className="flex flex-col mt-1">
-                        <span className="text-sm font-bold text-gray-700">{loan.borrowerId?.name || 'Unknown Borrower'}</span>
-                        <span className="text-xs text-gray-400 font-mono mt-0.5">ID: {loan._id.slice(-8)}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setViewLoanId(loan._id)}
-                        className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        Details
-                      </button>
-                      {!isClosed && (
-                        <button
-                          onClick={() => openPanel(loan._id)}
-                          className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-bold transition-all ${
-                            isOpen
-                              ? 'bg-gray-100 text-gray-700'
-                              : 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 hover:shadow-md active:scale-95'
-                          }`}
-                        >
-                          {isOpen ? (
-                            <>
-                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                              Cancel
-                            </>
-                          ) : (
-                            <>
-                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                              Add Payment
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Payment progress */}
-                  <PaymentProgress paid={amountPaid} total={loan.totalRepayment} />
-
-                  {/* Inline payment form */}
-                  {isOpen && (
-                    <div className="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                      <h4 className="mb-3 text-sm font-bold text-indigo-900">Record Payment</h4>
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        <div>
-                          <label className="mb-1 block text-xs font-semibold text-gray-600">Amount (₹)</label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
-                            <input
-                              type="number"
-                              value={payAmount}
-                              onChange={(e) => setPayAmount(e.target.value)}
-                              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                              placeholder={`Max ₹${Math.round(Math.max(loan.totalRepayment - (loan.amountPaid ?? 0), 0)).toLocaleString()}`}
-                              max={Math.round(Math.max(loan.totalRepayment - (loan.amountPaid ?? 0), 0))}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="mb-1 block text-xs font-semibold text-gray-600">UTR / Reference No.</label>
-                          <input
-                            type="text"
-                            value={utrNumber}
-                            onChange={(e) => setUtrNumber(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                            placeholder="Bank reference"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-1 block text-xs font-semibold text-gray-600">Payment Date</label>
-                          <input
-                            type="date"
-                            value={paymentDate}
-                            onChange={(e) => setPaymentDate(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                          />
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleAddPayment(loan._id)}
-                        disabled={submitting}
-                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 py-3 text-sm font-bold text-white shadow-lg shadow-green-500/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        {submitting ? (
-                          <>
-                            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
-                            Recording...
-                          </>
-                        ) : (
-                          <>
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            Confirm Payment of ₹{payAmount ? Number(payAmount).toLocaleString() : '—'}
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Payment history list */}
-                  {loan.payments && loan.payments.length > 0 && (
-                    <div className="mt-6 rounded-2xl bg-gray-50/80 p-2 ring-1 ring-inset ring-gray-100/80">
-                      <button 
-                        className="flex w-full items-center justify-between rounded-xl px-4 py-3 hover:bg-white hover:shadow-sm transition-all"
-                        onClick={() => setExpandedHistory(prev => ({ ...prev, [loan._id]: !prev[loan._id] }))}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
-                            {loan.payments.length}
-                          </span>
-                          <h4 className="text-sm font-bold text-gray-800">Repayment History</h4>
-                        </div>
-                        <svg className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedHistory[loan._id] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      
-                      {expandedHistory[loan._id] && (
-                        <div className="px-4 py-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                          <div className="relative space-y-6 before:absolute before:inset-y-0 before:left-[7px] before:w-0.5 before:bg-gray-200">
-                            {loan.payments.map((p: any, i: number) => (
-                              <div key={i} className="relative pl-8 flex flex-wrap items-center justify-between gap-2">
-                                <span className="absolute left-[3px] top-1/2 flex h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-green-500 ring-4 ring-gray-50" />
-                                <div>
-                                  <p className="font-extrabold text-gray-900 text-base">₹{Number(p.amount).toLocaleString()}</p>
-                                  <p className="text-xs font-medium text-gray-500 mt-1">UTR: <span className="font-mono font-bold text-gray-600">{p.utrNumber}</span></p>
-                                </div>
-                                <div className="text-right">
-                                  <span className="block text-xs font-bold text-gray-600 mb-1.5">
-                                    {new Date(p.paymentDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                                  </span>
-                                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-green-700 ring-1 ring-inset ring-green-600/20">Success</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+          {activeTab === 'ACTIVE' && (
+            active.length === 0 ? (
+              <div className="py-8 text-center text-xs font-bold text-gray-500 uppercase tracking-widest rounded bg-white border-2 border-[#0f0f0f]/20">
+                No active loans found.
               </div>
-            );
-          })}
+            ) : (
+              active.map(renderLoan)
+            )
+          )}
+
+          {activeTab === 'CLOSED' && (
+            closed.length === 0 ? (
+              <div className="py-8 text-center text-xs font-bold text-gray-500 uppercase tracking-widest rounded bg-white border-2 border-[#0f0f0f]/20">
+                No closed loans yet.
+              </div>
+            ) : (
+              closed.map(renderLoan)
+            )
+          )}
         </div>
       )}
 

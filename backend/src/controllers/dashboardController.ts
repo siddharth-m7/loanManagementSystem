@@ -123,7 +123,7 @@ export const addPayment = async (req: AuthRequest, res: Response) => {
 
     const allPayments = await paymentRepository.find({ loanId: loan._id });
     const currentTotalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
-    const remaining = Math.round(Math.max(loan.totalRepayment - currentTotalPaid, 0));
+    const remaining = Math.ceil(Math.max(loan.totalRepayment - currentTotalPaid, 0));
 
     if (Number(amount) > remaining) {
       return res.status(400).json({ error: `Payment amount exceeds outstanding balance of ₹${remaining.toFixed(2)}` });

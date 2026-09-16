@@ -75,23 +75,36 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const navItems = getNavItems();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F4F7FB] font-sans">
+    <div className="flex min-h-screen flex-col bg-white font-sans selection:bg-orange-500 selection:text-white">
+      {/* Global Grid Background */}
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none opacity-40" 
+        style={{
+          backgroundSize: '40px 40px',
+          backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px)',
+          backgroundPosition: 'center top'
+        }}
+      />
+      
       {/* Top Navbar */}
-      <header className="flex h-16 shrink-0 items-center justify-between bg-white px-6 shadow-sm z-10 border-b border-gray-100">
+      <header className="flex h-16 shrink-0 items-center justify-between bg-white px-6 shadow-[0_4px_0_0_rgba(15,15,15,1)] z-20 border-b-2 border-[#0f0f0f] relative">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => router.back()} 
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors mr-2"
+            className="flex h-8 w-8 items-center justify-center rounded bg-white text-[#0f0f0f] border-2 border-[#0f0f0f] hover:bg-[#0f0f0f] hover:text-white transition-colors mr-2 shadow-[2px_2px_0_0_rgba(15,15,15,1)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px]"
             title="Go Back"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700">
-            <div className="h-4 w-4 rounded-full bg-blue-400"></div>
+          
+          <div className="flex items-center gap-2 rounded px-2 py-1 border-2 border-[#0f0f0f] bg-white">
+            <span className="h-2 w-2 rounded-full bg-[#10b981]"></span>
+            <span className="text-xs font-black tracking-widest text-[#0f0f0f] uppercase">
+              LMS
+            </span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-gray-900">LMS</span>
         </div>
         
 
@@ -99,31 +112,31 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3">
             <div className="text-right hidden md:block">
-              <p className="text-sm font-semibold text-gray-700 leading-tight">{userName}</p>
-              <p className="text-xs text-gray-400">{role.charAt(0) + role.slice(1).toLowerCase()}</p>
+              <p className="text-xs font-black text-[#0f0f0f] uppercase tracking-widest leading-tight">{userName}</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase">{role}</p>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 font-bold uppercase">
+            <div className="flex h-9 w-9 items-center justify-center rounded border-2 border-[#0f0f0f] bg-white text-[#0f0f0f] font-black uppercase">
               {userName.charAt(0)}
             </div>
           </div>
           <button
             onClick={() => { localStorage.clear(); router.push('/'); }}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="flex items-center gap-2 rounded border-2 border-[#0f0f0f] px-3 py-1.5 text-xs font-black uppercase tracking-widest text-[#0f0f0f] hover:bg-[#0f0f0f] hover:text-white transition-colors shadow-[2px_2px_0_0_rgba(15,15,15,1)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px]"
             title="Sign Out"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span>Logout</span>
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>
 
       {/* Main Layout Area */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative z-10">
         {/* Sidebar */}
-        <aside className="w-[240px] shrink-0 bg-white border-r border-gray-100 flex flex-col pt-6">
-          <nav className="flex-1 space-y-1 px-3">
+        <aside className="w-[240px] shrink-0 bg-white border-r-2 border-[#0f0f0f] flex flex-col pt-6 z-10 relative">
+          <nav className="flex-1 space-y-3 px-4">
             {navItems.map((item) => {
               const tab = searchParams.get('tab');
               const isActive = tab ? item.path.includes(`tab=${tab}`) : pathname === item.path && !item.path.includes('?');
@@ -131,13 +144,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <button
                   key={item.label}
                   onClick={() => item.path !== '#' && router.push(item.path)}
-                  className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  className={`flex w-full items-center gap-3 rounded border-2 px-4 py-2.5 text-xs font-black uppercase tracking-widest transition-all ${
                     isActive
-                      ? 'bg-[#EEF2FF] text-[#4F46E5]'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-[#0f0f0f] text-white border-[#0f0f0f] shadow-[2px_2px_0_0_rgba(217,119,6,1)]'
+                      : 'bg-white text-[#0f0f0f] border-transparent hover:border-[#0f0f0f] hover:shadow-[2px_2px_0_0_rgba(15,15,15,1)] hover:-translate-y-0.5'
                   }`}
                 >
-                  {item.icon}
+                  <span className={isActive ? 'text-[#d97706]' : ''}>{item.icon}</span>
                   {item.label}
                 </button>
               );
@@ -146,7 +159,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8">
           <div className="mx-auto max-w-[1200px]">
             {children}
           </div>

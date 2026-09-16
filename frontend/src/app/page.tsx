@@ -8,61 +8,51 @@ const roles = [
   {
     icon: '👔',
     title: 'Admin',
-    color: 'from-slate-600 to-slate-800',
-    badge: 'bg-slate-100 text-slate-700',
     features: [
       'Full system oversight & monitoring',
-      'View all 4 executive dashboards in one place',
+      'View all 4 executive dashboards',
       'Track the entire loan lifecycle',
-      'Access aggregated reports & analytics',
+      'Access reports & analytics',
     ],
   },
   {
     icon: '📊',
-    title: 'Sales Executive',
-    color: 'from-blue-500 to-blue-700',
-    badge: 'bg-blue-50 text-blue-700',
+    title: 'Sales Exec',
     features: [
-      'View all incoming loan applications',
-      'Review borrower details & documents',
-      'Track application status in real-time',
-      'Forward qualified applications for review',
+      'View incoming loan applications',
+      'Review borrower details',
+      'Track real-time status',
+      'Forward qualified applications',
     ],
   },
   {
     icon: '✅',
-    title: 'Sanction Executive',
-    color: 'from-indigo-500 to-violet-700',
-    badge: 'bg-indigo-50 text-indigo-700',
+    title: 'Sanction Exec',
     features: [
-      'Review & evaluate loan applications',
-      'Approve or reject applications with remarks',
-      'Verify eligibility against business rules',
-      'Ensure compliance with lending policies',
+      'Review & evaluate applications',
+      'Approve or reject with remarks',
+      'Verify eligibility rules',
+      'Ensure lending compliance',
     ],
   },
   {
     icon: '💳',
-    title: 'Disbursement Executive',
-    color: 'from-green-500 to-emerald-700',
-    badge: 'bg-green-50 text-green-700',
+    title: 'Disbursement',
     features: [
-      'Process approved loan disbursements',
-      'Manage fund transfer workflows',
-      'Record disbursement dates & amounts',
-      'Generate disbursement confirmations',
+      'Process loan disbursements',
+      'Manage transfer workflows',
+      'Record dates & amounts',
+      'Generate confirmations',
     ],
   },
   {
     icon: '🏦',
-    title: 'Collection Executive',
-    color: 'from-orange-500 to-amber-600',
-    badge: 'bg-orange-50 text-orange-700',
+    title: 'Collection',
     features: [
-      'Track active loans & repayment schedules',
-      'Log EMI & payment collections',
-      'Manage overdue & defaulted accounts',
-      'Monitor portfolio collection health',
+      'Track repayment schedules',
+      'Log EMI & collections',
+      'Manage defaulted accounts',
+      'Monitor portfolio health',
     ],
   },
 ];
@@ -93,147 +83,157 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-white font-sans">
-      <Navbar />
+    <div className="relative min-h-screen bg-white font-sans selection:bg-orange-500 selection:text-white">
+      {/* Global Grid Background */}
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none opacity-40" 
+        style={{
+          backgroundSize: '40px 40px',
+          backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px)',
+          backgroundPosition: 'center top'
+        }}
+      />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-6 pb-24 pt-20 text-center">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-0 h-96 w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-400/10 to-indigo-400/10 blur-3xl" />
-        </div>
-        <div className="relative mx-auto max-w-4xl">
-          <span className="mb-6 inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-700">
-            🎓 Full-Stack Loan Management System — Assignment
-          </span>
-          <h1 className="mb-6 text-5xl font-black leading-tight tracking-tight text-gray-900 sm:text-6xl">
-            Smart Loans with{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              LMS
+      <div className="relative z-10">
+        <Navbar />
+
+        {/* Hero Section */}
+        <section className="px-4 pt-12 pb-16 text-center mx-auto max-w-5xl">
+          <div className="mb-6 flex items-center justify-center gap-2 rounded-full px-3 py-1 bg-white border border-gray-200 inline-flex">
+            <span className="h-2 w-2 rounded-full bg-[#10b981]"></span>
+            <span className="text-[10px] font-bold tracking-[0.15em] text-gray-500 uppercase">
+              LMS · Loan Management System
+            </span>
+          </div>
+
+          <h1 className="mb-6 text-5xl md:text-6xl lg:text-[5.5rem] font-black leading-[1.05] tracking-tighter text-[#0f0f0f]">
+            <span className="block">Loan Management</span>
+            <span className="block">
+              System <span className="text-[#d97706]">Assignment</span>
             </span>
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-gray-600">
-            A comprehensive loan management platform connecting borrowers with a structured pipeline of executives — from
-            application to disbursement and collection. Built with Next.js, Express, and MongoDB.
+
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-500 font-medium tracking-tight">
+            Your comprehensive loan management platform — apply for personal loans, get quick approvals, and manage your repayments with ease.
           </p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row w-full sm:w-auto mb-12">
             <button
               onClick={() => router.push('/register')}
-              className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-blue-500/30 transition hover:scale-[1.03] hover:shadow-blue-500/40 sm:w-auto"
+              className="w-full sm:w-[200px] rounded bg-[#0f0f0f] px-8 py-3.5 text-xs font-bold tracking-widest text-white transition-all hover:bg-black hover:-translate-y-0.5 shadow-[4px_4px_0_0_rgba(217,119,6,0.3)]"
             >
-              Apply for a Loan →
+              GET STARTED &rarr;
             </button>
             <button
               onClick={() => router.push('/login')}
-              className="w-full rounded-xl border-2 border-gray-200 bg-white px-8 py-4 text-base font-bold text-gray-700 transition hover:border-blue-300 hover:bg-gray-50 sm:w-auto"
+              className="w-full sm:w-[200px] rounded border-2 border-[#0f0f0f] bg-white px-8 py-3.5 text-xs font-bold tracking-widest text-gray-900 transition-all hover:bg-gray-50 hover:-translate-y-0.5"
             >
-              Executive Login
+              SIGN IN
             </button>
           </div>
-        </div>
-      </section>
 
-      {/* Roles Section */}
-      <section className="bg-gray-50 px-6 py-24">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-14 text-center">
-            <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900">
-              Who Uses LMS?
-            </h2>
-            <p className="mx-auto max-w-xl text-lg text-gray-500">
-              Five distinct roles, each with a tailored dashboard and permissions — ensuring the right information reaches the right person.
-            </p>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {roles.map((role) => (
-              <div
-                key={role.title}
-                className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${role.color} text-2xl shadow-md`}>
-                  {role.icon}
-                </div>
-                <div className="mb-3 flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-gray-900">{role.title}</h3>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${role.badge}`}>Role</span>
-                </div>
-                <ul className="space-y-2">
-                  {role.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                      <span className="mt-0.5 shrink-0 text-blue-500">✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Loan Requirements */}
-      <section className="bg-white px-6 py-24">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-14 text-center">
-            <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900">
-              Loan Requirements
-            </h2>
-            <p className="mx-auto max-w-xl text-lg text-gray-500">
-              A simple set of eligibility criteria ensures fair and responsible lending for all borrowers.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {requirements.map((req) => (
-              <div
-                key={req.label}
-                className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-5 transition hover:border-blue-200 hover:bg-blue-50/30"
-              >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
-                  {req.icon}
-                </span>
-                <div>
-                  <div className="text-sm font-semibold text-gray-500">{req.label}</div>
-                  <div className="text-base font-bold text-gray-900">{req.value}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Loan Lifecycle */}
-      <section className="bg-gray-50 border-t border-gray-100 px-6 py-24">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-14 text-center">
-            <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900">Loan Lifecycle</h2>
-            <p className="mx-auto max-w-xl text-lg text-gray-500">
-              Every application follows a structured, transparent pipeline from start to finish.
-            </p>
-          </div>
-          <div className="relative mx-auto mt-20 max-w-6xl">
-            {/* Connecting Line for Desktop */}
-            <div className="absolute left-1/2 top-10 hidden h-0.5 w-4/5 -translate-x-1/2 bg-gray-200 md:block" />
-
-            <div className="grid gap-12 md:grid-cols-5 md:gap-6">
-              {lifecycle.map((item, i) => (
-                <div key={item.step} className="relative z-10 flex flex-col items-center text-center group">
-                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm ring-4 ring-gray-100 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-600 group-hover:ring-blue-100">
-                    <span className="text-2xl font-black text-blue-600 group-hover:text-white transition-colors">{item.step}</span>
+        {/* Roles Section */}
+        <section className="px-6 py-20 border-t-2 border-[#0f0f0f]/10">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-12 text-center">
+              <h2 className="mb-3 text-3xl md:text-4xl font-black tracking-tighter text-[#0f0f0f]">
+                Who Uses LMS?
+              </h2>
+              <p className="mx-auto max-w-xl text-base font-medium text-gray-500">
+                Five distinct roles, each with a tailored dashboard and permissions.
+              </p>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+              {roles.map((role) => (
+                <div
+                  key={role.title}
+                  className="bg-white p-5 border-2 border-[#0f0f0f]/10 transition-transform hover:-translate-y-1 hover:shadow-[4px_4px_0_0_rgba(15,15,15,1)] rounded-lg"
+                >
+                  <div className="mb-3 text-3xl">
+                    {role.icon}
                   </div>
-                  <h3 className="mb-3 text-lg font-extrabold tracking-tight text-gray-900">{item.title}</h3>
-                  <p className="text-sm font-medium text-gray-500 leading-relaxed px-2">{item.desc}</p>
+                  <h3 className="text-lg font-black text-[#0f0f0f] mb-3">{role.title}</h3>
+                  <ul className="space-y-2">
+                    {role.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-xs font-semibold text-gray-600">
+                        <span className="text-[#d97706]">■</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 bg-gray-50 py-8 text-center text-sm text-gray-400">
-        <p>
-          <span className="font-bold text-gray-700">LMS</span> — Loan Management System &nbsp;&middot;&nbsp; Built with Next.js, Express &amp; MongoDB
-        </p>
-      </footer>
+        {/* Loan Requirements */}
+        <section className="px-6 py-20 border-t-2 border-[#0f0f0f]/10 bg-white/50 backdrop-blur-sm">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-12 text-center">
+              <h2 className="mb-3 text-3xl md:text-4xl font-black tracking-tighter text-[#0f0f0f]">
+                Loan Requirements
+              </h2>
+              <p className="mx-auto max-w-xl text-base font-medium text-gray-500">
+                A simple set of eligibility criteria ensures fair lending.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {requirements.map((req) => (
+                <div
+                  key={req.label}
+                  className="flex items-center gap-4 border-2 border-[#0f0f0f]/10 bg-white p-4 rounded-lg transition hover:border-[#0f0f0f]"
+                >
+                  <span className="text-2xl">
+                    {req.icon}
+                  </span>
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-[#d97706] mb-1">{req.label}</div>
+                    <div className="text-sm font-bold text-[#0f0f0f]">{req.value}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Loan Lifecycle */}
+        <section className="px-6 py-20 border-t-2 border-[#0f0f0f]/10">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-16 text-center">
+              <h2 className="mb-3 text-3xl md:text-4xl font-black tracking-tighter text-[#0f0f0f]">Loan Lifecycle</h2>
+              <p className="mx-auto max-w-xl text-base font-medium text-gray-500">
+                Structured, transparent pipeline from start to finish.
+              </p>
+            </div>
+            
+            <div className="grid gap-8 md:grid-cols-5 relative">
+              {/* Connecting Line */}
+              <div className="absolute left-0 top-[22px] hidden h-[2px] w-full bg-[#0f0f0f]/10 md:block" />
+
+              {lifecycle.map((item) => (
+                <div key={item.step} className="relative z-10 flex flex-col items-center text-center">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-sm border-2 border-[#0f0f0f] bg-white font-black text-[#0f0f0f] transition-transform hover:-translate-y-1 hover:shadow-[3px_3px_0_0_rgba(217,119,6,1)]">
+                    {item.step}
+                  </div>
+                  <h3 className="mb-2 text-base font-black tracking-tight text-[#0f0f0f]">{item.title}</h3>
+                  <p className="text-xs font-semibold text-gray-500 leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t-2 border-[#0f0f0f]/10 bg-white py-8 text-center text-xs font-bold tracking-widest text-gray-400 uppercase">
+          <p>
+            <span className="text-[#0f0f0f]">LMS</span> · Built with Next.js &amp; Express
+          </p>
+        </footer>
+      </div>
     </div>
   );
 }

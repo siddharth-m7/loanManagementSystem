@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { fetchApi, SERVER_URL } from '@/lib/api';
 
 interface Props {
@@ -9,18 +10,18 @@ interface Props {
 }
 
 const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
-  APPROVED: 'bg-green-50 text-green-700 ring-green-600/20',
-  REJECTED: 'bg-red-50 text-red-700 ring-red-600/20',
-  DISBURSED: 'bg-blue-50 text-blue-700 ring-blue-600/20',
-  CLOSED: 'bg-gray-50 text-gray-700 ring-gray-600/20',
+  PENDING: 'bg-yellow-400 text-[#0f0f0f]',
+  APPROVED: 'bg-green-400 text-[#0f0f0f]',
+  REJECTED: 'bg-red-500 text-white',
+  DISBURSED: 'bg-blue-500 text-white',
+  CLOSED: 'bg-gray-300 text-[#0f0f0f]',
 };
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between border-b border-gray-50 py-3 last:border-0">
-      <span className="text-sm font-medium text-gray-500">{label}</span>
-      <span className="text-sm font-semibold text-gray-900">{value ?? '—'}</span>
+    <div className="flex items-center justify-between border-b-2 border-[#0f0f0f] py-3 last:border-0">
+      <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{label}</span>
+      <span className="text-sm font-black text-[#0f0f0f]">{value ?? '—'}</span>
     </div>
   );
 }
@@ -29,8 +30,10 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
   const [loan, setLoan] = useState<any>(null);
   const [borrower, setBorrower] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     fetchApi(`/loans/${loanId}`)
       .then((data) => {
         setLoan(data.loan);
@@ -40,29 +43,31 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
       .finally(() => setLoading(false));
   }, [loanId]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+  if (!mounted) return null;
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
       {/* Panel */}
       <div
-        className="relative z-10 w-full max-w-lg rounded-2xl bg-white shadow-2xl animate-in zoom-in-95 fade-in duration-200"
+        className="relative z-10 w-full max-w-lg rounded border-2 border-[#0f0f0f] bg-white shadow-[8px_8px_0_0_rgba(15,15,15,1)] animate-in zoom-in-95 fade-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+        <div className="flex items-center justify-between border-b-2 border-[#0f0f0f] px-6 py-5">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Loan Details</h2>
+            <h2 className="text-lg font-black uppercase tracking-widest text-[#0f0f0f]">Loan Details</h2>
             {loan && (
-              <p className="mt-0.5 font-mono text-xs text-gray-400">ID: {loan._id}</p>
+              <p className="mt-0.5 font-bold text-[10px] text-gray-400 uppercase tracking-widest">ID: {loan._id}</p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+            className="rounded border-2 border-[#0f0f0f] p-1.5 text-[#0f0f0f] transition hover:bg-[#0f0f0f] hover:text-white"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -81,20 +86,20 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
           ) : loan ? (
             <div className="space-y-6">
               {/* Status + Amount */}
-              <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 p-4 text-center">
-                <p className="text-sm font-medium text-gray-500">Loan Amount</p>
-                <p className="mt-1 text-4xl font-black tracking-tight text-gray-900">
+              <div className="rounded border-2 border-[#0f0f0f] bg-yellow-50 p-4 text-center shadow-[4px_4px_0_0_rgba(15,15,15,1)]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Loan Amount</p>
+                <p className="mt-1 text-4xl font-black text-[#0f0f0f]">
                   ₹{loan.amount.toLocaleString()}
                 </p>
-                <span className={`mt-2 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ${statusColors[loan.status] || statusColors.PENDING}`}>
+                <span className={`mt-2 inline-flex items-center rounded border-2 border-[#0f0f0f] px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-[2px_2px_0_0_rgba(15,15,15,1)] ${statusColors[loan.status] || statusColors.PENDING}`}>
                   {loan.status}
                 </span>
               </div>
 
               {/* Loan Info */}
               <div>
-                <h3 className="mb-1 text-xs font-bold uppercase tracking-wider text-gray-400">Loan Info</h3>
-                <div className="rounded-xl bg-gray-50 px-4">
+                <h3 className="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0f0f0f]">Loan Info</h3>
+                <div className="rounded border-2 border-[#0f0f0f] bg-white px-4 shadow-[4px_4px_0_0_rgba(15,15,15,1)]">
                   <Row label="Tenure" value={`${loan.tenure} days`} />
                   <Row label="Interest Rate" value={`${loan.interestRate}% p.a.`} />
                   <Row label="Total Repayment" value={`₹${loan.totalRepayment?.toFixed(2)}`} />
@@ -104,7 +109,7 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
                       label="Salary Slip"
                       value={
                         <a href={loan.salarySlipUrl.startsWith('http') ? loan.salarySlipUrl : `${SERVER_URL}${loan.salarySlipUrl}`} target="_blank" className="text-blue-600 underline hover:text-blue-700">
-                          View Document
+                          VIEW DOCUMENT
                         </a>
                       }
                     />
@@ -118,8 +123,8 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
               {/* Borrower Info */}
               {borrower && (
                 <div>
-                  <h3 className="mb-1 text-xs font-bold uppercase tracking-wider text-gray-400">Borrower</h3>
-                  <div className="rounded-xl bg-gray-50 px-4">
+                  <h3 className="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0f0f0f]">Borrower</h3>
+                  <div className="rounded border-2 border-[#0f0f0f] bg-white px-4 shadow-[4px_4px_0_0_rgba(15,15,15,1)]">
                     <Row label="Name" value={borrower.name} />
                     <Row label="Email" value={borrower.email} />
                     <Row label="PAN" value={borrower.pan} />
@@ -133,15 +138,15 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
               {/* Payments */}
               {loan.payments && loan.payments.length > 0 && (
                 <div>
-                  <h3 className="mb-1 text-xs font-bold uppercase tracking-wider text-gray-400">Payments ({loan.payments.length})</h3>
+                  <h3 className="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0f0f0f]">Payments ({loan.payments.length})</h3>
                   <div className="space-y-2">
                     {loan.payments.map((p: any, i: number) => (
-                      <div key={i} className="flex items-center justify-between rounded-xl bg-green-50 px-4 py-3">
+                      <div key={i} className="flex items-center justify-between rounded border-2 border-[#0f0f0f] bg-green-50 px-4 py-3 shadow-[2px_2px_0_0_rgba(15,15,15,1)]">
                         <div>
-                          <p className="text-sm font-bold text-green-800">₹{Number(p.amount).toLocaleString()}</p>
-                          <p className="text-xs text-green-600">UTR: {p.utrNumber}</p>
+                          <p className="text-sm font-black text-[#0f0f0f]">₹{Number(p.amount).toLocaleString()}</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">UTR: {p.utrNumber}</p>
                         </div>
-                        <span className="text-xs text-green-600">{new Date(p.paymentDate).toLocaleDateString()}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{new Date(p.paymentDate).toLocaleDateString()}</span>
                       </div>
                     ))}
                   </div>
@@ -154,15 +159,17 @@ export default function LoanDetailModal({ loanId, onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 px-6 py-4">
+        <div className="border-t-2 border-[#0f0f0f] px-6 py-4">
           <button
             onClick={onClose}
-            className="w-full rounded-xl bg-gray-100 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-200"
+            className="w-full rounded border-2 border-[#0f0f0f] bg-white py-3 text-[10px] font-black uppercase tracking-widest text-[#0f0f0f] shadow-[4px_4px_0_0_rgba(15,15,15,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none transition-all"
           >
-            Close
+            CLOSE
           </button>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

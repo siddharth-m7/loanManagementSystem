@@ -32,13 +32,12 @@ export const applyLoan = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Tenure must be between 30 and 365 days' });
     }
 
-    // Update user profile if new information is provided
+    // Update user profile if new information is provided (in memory)
     if (pan || dob || salary || employmentMode) {
       if (pan && pan !== user.pan) user.pan = pan; // Only update if PAN is new to avoid duplicate key errors
       if (dob) user.dob = new Date(dob);
       if (salary) user.salary = Number(salary);
       if (employmentMode) user.employmentMode = employmentMode;
-      await user.save();
     }
 
     // Evaluate Business Rules
@@ -49,6 +48,11 @@ export const applyLoan = async (req: AuthRequest, res: Response) => {
         error: 'Loan application rejected by Business Rule Engine', 
         reason: breResult.reason 
       });
+    }
+
+    // If approved by BRE, persist user updates to database
+    if (user.isModified()) {
+      await user.save();
     }
 
     // File Upload handling via multer
