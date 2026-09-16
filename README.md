@@ -1,5 +1,7 @@
 # CreditSea Loan Management System (LMS)
 
+[**🎥 Watch the Full Demo Video Here**](https://drive.google.com/file/d/1X-5mimKLe3lNVBYN2NMoIdniXQHrzCMF/view?usp=sharing)
+
 CreditSea LMS is a comprehensive, production-ready Loan Management System built to manage the entire lifecycle of a loan, from application by a borrower to final repayment collection. It features a robust multi-role architecture, ensuring that each step of the loan process is handled by the appropriate department, all wrapped in a premium Neo-brutalist user interface.
 
 ## 🚀 Features
